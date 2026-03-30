@@ -1,9 +1,11 @@
 from flask import Flask
+from flask_wtf import CSRFProtect
 from flask import render_template
 from flask import request
 from flask import redirect
 from flask_cors import CORS
 import user_management as dbHandler
+
 
 # Code snippet for logging a message
 # app.logger.critical("message")
@@ -11,6 +13,10 @@ import user_management as dbHandler
 app = Flask(__name__)
 # Enable CORS to allow cross-origin requests (needed for CSRF demo in Codespaces)
 CORS(app)
+
+app = Flask(__name__)
+app.config["SECRET_KEY"] = "your-secret-key"
+csrf = CSRFProtect(app)
 
 
 @app.route("/success.html", methods=["POST", "GET", "PUT", "PATCH", "DELETE"])
@@ -71,3 +77,10 @@ if __name__ == "__main__":
     app.config["TEMPLATES_AUTO_RELOAD"] = True
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
     app.run(debug=True, host="0.0.0.0", port=5000)
+
+
+@app.after_request
+def add_security_headers(response):
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Content-Security-Policy"] = "frame-ancestors 'none';"
+    return response
